@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react';
 import { 
   ChevronRight, 
-  Send, 
   X, 
   Layout, 
   Home, 
@@ -10,24 +9,16 @@ import {
   Flag, 
   Square,
   Sparkles,
-  MessageCircle,
-  Bot,
-  Loader2,
   ArrowRight,
-  ExternalLink,
   Phone,
   Layers,
   Zap,
   CheckCircle2,
   Menu,
   Instagram,
-  Facebook,
-  Star,
-  Quote
+  Facebook
 } from 'lucide-react';
 import { cn } from './lib/utils';
-import { chatWithGemini } from './services/aiService';
-import ReactMarkdown from 'react-markdown';
 
 const SERVICES = [
   { 
@@ -79,33 +70,16 @@ const PROCESS = [
   { step: '04', title: 'Instalação de Precisão', desc: 'Nossa equipe técnica garante um acabamento impecável no local.' },
 ];
 
-const TESTIMONIALS = [
-  { name: 'Ricardo Silva', role: 'Proprietário, Café Gourmet', text: 'A fachada em ACM mudou completamente o fluxo de clientes. O brilho do LED à noite é sensacional.' },
-  { name: 'Ana Paula', role: 'Gerente de Marketing', text: 'A adesivagem da nossa frota ficou impecável. Durabilidade e cores vibrantes que chamam atenção.' },
-  { name: 'Marcos Oliveira', role: 'Arquiteto', text: 'Parceiro de confiança para todos os meus projetos de sinalização interna. Qualidade indiscutível.' },
-];
-
 export default function App() {
   const [activeGallery, setActiveGallery] = useState<string | null>(null);
-  const [showAIConsultant, setShowAIConsultant] = useState(false);
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'bot', text: string }[]>([]);
-  const [chatInput, setChatInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
-  const chatEndRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001
   });
-
-  useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [chatMessages]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -115,41 +89,13 @@ export default function App() {
     setIsMenuOpen(false);
   };
 
-  const handleSendMessage = async () => {
-    if (!chatInput.trim()) return;
-    const userMsg = chatInput;
-    setChatInput('');
-    setChatMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-    setIsTyping(true);
-
-    try {
-      let botResponse = '';
-      setChatMessages(prev => [...prev, { role: 'bot', text: '' }]);
-      
-      const stream = chatWithGemini(userMsg, []);
-      for await (const chunk of stream) {
-        botResponse += chunk;
-        setChatMessages(prev => {
-          const newMsgs = [...prev];
-          newMsgs[newMsgs.length - 1].text = botResponse;
-          return newMsgs;
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      setChatMessages(prev => [...prev, { role: 'bot', text: 'Desculpe, tive um problema ao processar sua mensagem.' }]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans selection:bg-blue-500/30 overflow-x-hidden">
       {/* Progress Bar */}
       <motion.div className="fixed top-0 left-0 right-0 h-1 bg-blue-600 z-[100] origin-left" style={{ scaleX }} />
 
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 p-6 md:p-10 flex justify-between items-center">
+      <nav className="fixed top-0 left-0 right-0 z-50 p-6 md:p-10 flex justify-between items-center bg-black/40 backdrop-blur-xl border-b border-white/10">
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -227,10 +173,6 @@ export default function App() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full text-blue-400 text-xs font-bold uppercase tracking-[0.2em] mb-8">
-              <Sparkles size={14} />
-              Elite em Comunicação Visual
-            </div>
             <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.85] tracking-tighter mb-10 font-display italic">
               Visão <br />
               <span className="text-blue-600 not-italic">Inovadora.</span> <br />
@@ -240,16 +182,7 @@ export default function App() {
               Elevamos o padrão da sua marca com fachadas monumentais e adesivagem de precisão. Onde outros veem superfícies, nós vemos oportunidades.
             </p>
             <div className="flex flex-wrap gap-6">
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => scrollToSection('servicos')}
-                className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black text-lg flex items-center gap-3 group"
-              >
-                Explorar Projetos
-                <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-              <div className="flex items-center gap-4 px-6">
+              <div className="flex items-center gap-4">
                 <div className="flex -space-x-4">
                   {[1,2,3].map(i => (
                     <div key={i} className="w-12 h-12 rounded-full border-4 border-[#0a0a0a] bg-slate-800 overflow-hidden">
@@ -295,28 +228,16 @@ export default function App() {
               </div>
             </div>
             {/* Floating Elements */}
-            <motion.div 
-              animate={{ y: [0, -20, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-10 -right-10 glass p-6 rounded-2xl hidden md:block"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-white font-black text-sm">Pronto para Instalar</span>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* Stats Section - Sensational Numbers */}
       <section className="py-20 border-y border-white/5 bg-white/5">
-        <div className="container mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
+        <div className="container mx-auto px-6 grid grid-cols-2 gap-12">
           {[
-            { label: 'Projetos', value: '1.2k+' },
-            { label: 'Cidades', value: '15+' },
-            { label: 'Anos', value: '10+' },
-            { label: 'Satisfação', value: '99%' },
+            { label: 'Cidades Atendidas', value: '15+' },
+            { label: 'Anos de Experiência', value: '10+' },
           ].map((stat, i) => (
             <motion.div 
               key={stat.label}
@@ -386,7 +307,7 @@ export default function App() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
             <div>
               <h2 className="text-6xl md:text-8xl font-black tracking-tighter leading-none mb-10 font-display italic">
-                A Jornada <br /> da <br /> <span className="text-blue-600 not-italic">Perfeição.</span>
+                Excelência <br /> em Cada <br /> <span className="text-blue-600 not-italic">Detalhe.</span>
               </h2>
               <p className="text-slate-600 text-xl font-medium max-w-md">
                 Nosso método é cirúrgico. Cada etapa é planejada para eliminar erros e maximizar o impacto visual do seu investimento.
@@ -408,37 +329,6 @@ export default function App() {
                 </motion.div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials - Immersive Quotes */}
-      <section className="py-40 px-6 bg-[#0a0a0a]">
-        <div className="container mx-auto">
-          <div className="text-center mb-24">
-            <span className="text-blue-600 font-black uppercase tracking-[0.3em] text-xs mb-4 block">Voz do Cliente</span>
-            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter font-display">Quem Confia, <span className="italic">Brilha.</span></h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {TESTIMONIALS.map((t, i) => (
-              <motion.div 
-                key={t.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className="glass p-12 rounded-[3rem] relative"
-              >
-                <Quote className="text-blue-600/20 absolute top-10 right-10" size={60} />
-                <div className="flex gap-1 mb-6">
-                  {[1,2,3,4,5].map(star => <Star key={star} size={16} className="fill-blue-600 text-blue-600" />)}
-                </div>
-                <p className="text-slate-300 text-lg font-medium italic mb-10 font-display">"{t.text}"</p>
-                <div>
-                  <span className="block text-white font-black text-xl">{t.name}</span>
-                  <span className="text-slate-500 text-sm font-bold uppercase tracking-widest">{t.role}</span>
-                </div>
-              </motion.div>
-            ))}
           </div>
         </div>
       </section>
@@ -497,16 +387,8 @@ export default function App() {
           <div className="flex flex-col lg:flex-row justify-between items-start gap-20 mb-20">
             <div className="max-w-2xl">
               <h2 className="text-6xl md:text-9xl font-black text-black tracking-tighter leading-none mb-10 font-display italic">
-                Domine <br /> o <br /> <span className="text-blue-600 not-italic">Espaço.</span>
+                Transforme <br /> sua <br /> <span className="text-blue-600 not-italic">Marca.</span>
               </h2>
-              <motion.a 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href="https://wa.me/5519992219448"
-                className="inline-flex items-center gap-4 px-12 py-6 bg-black text-white rounded-full font-black text-2xl shadow-2xl shadow-black/20"
-              >
-                Falar com Rogério <Phone size={28} />
-              </motion.a>
             </div>
             <div className="grid grid-cols-2 gap-20">
               <div className="space-y-8">
@@ -520,13 +402,25 @@ export default function App() {
                 </div>
               </div>
               <div className="space-y-8">
-                <span className="block text-slate-400 font-black uppercase tracking-widest text-xs">Social</span>
+                <span className="block text-slate-400 font-black uppercase tracking-widest text-xs">Conecte-se</span>
                 <div className="flex flex-col gap-6">
-                  <a href="#" className="flex items-center gap-4 text-black font-black text-2xl hover:text-blue-600 transition-colors font-display">
-                    <Instagram size={24} /> Instagram
+                  <a href="https://wa.me/5519992219448" className="flex items-center gap-4 text-black font-black text-2xl hover:text-blue-600 transition-all font-display group">
+                    <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                      <Phone size={24} />
+                    </div>
+                    WhatsApp
                   </a>
-                  <a href="#" className="flex items-center gap-4 text-black font-black text-2xl hover:text-blue-600 transition-colors font-display">
-                    <Facebook size={24} /> Facebook
+                  <a href="#" className="flex items-center gap-4 text-black font-black text-2xl hover:text-blue-600 transition-all font-display group">
+                    <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                      <Instagram size={24} />
+                    </div>
+                    Instagram
+                  </a>
+                  <a href="#" className="flex items-center gap-4 text-black font-black text-2xl hover:text-blue-600 transition-all font-display group">
+                    <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                      <Facebook size={24} />
+                    </div>
+                    Facebook
                   </a>
                 </div>
               </div>
@@ -544,124 +438,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
-      {/* AI Consultant - Integrated Command Center */}
-      <AnimatePresence>
-        {showAIConsultant && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl"
-          >
-            <div className="w-full max-w-5xl h-[85vh] bg-[#1a1a1a] rounded-[4rem] border border-white/10 overflow-hidden flex flex-col shadow-2xl">
-              <div className="p-12 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-blue-600/20 to-transparent">
-                <div className="flex items-center gap-8">
-                  <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-600/30">
-                    <Bot className="text-white" size={40} />
-                  </div>
-                  <div>
-                    <h3 className="text-3xl font-black text-white font-display">Consultor Estratégico</h3>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
-                      <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">IA RogérioVisual Ativa</span>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setShowAIConsultant(false)}
-                  className="w-16 h-16 glass rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
-                >
-                  <X size={32} />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-12 space-y-10 scrollbar-hide">
-                {chatMessages.length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center text-center max-w-lg mx-auto">
-                    <Sparkles className="text-blue-600 mb-10" size={80} />
-                    <h4 className="text-4xl font-black text-white mb-6 font-display">Como podemos elevar sua presença visual hoje?</h4>
-                    <p className="text-slate-400 font-medium text-lg mb-12 leading-relaxed">
-                      Sou o cérebro digital da RogérioVisual. Posso te ajudar com orçamentos, escolha de materiais e insights criativos para seu negócio em SJBV.
-                    </p>
-                    <div className="grid grid-cols-1 gap-4 w-full">
-                      {[
-                        "Qual o melhor material para fachadas externas?",
-                        "Ideias criativas para adesivagem de frotas",
-                        "Como funciona o serviço em SJBV?"
-                      ].map(s => (
-                        <button 
-                          key={s}
-                          onClick={() => setChatInput(s)}
-                          className="p-6 glass rounded-3xl text-lg font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-all text-left"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {chatMessages.map((msg, i) => (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    key={i} 
-                    className={cn(
-                      "max-w-[85%] p-10 rounded-[3rem] text-xl font-medium leading-relaxed",
-                      msg.role === 'user' 
-                        ? "bg-blue-600 text-white ml-auto rounded-tr-none shadow-xl shadow-blue-600/20" 
-                        : "bg-white/5 text-slate-200 mr-auto rounded-tl-none border border-white/5"
-                    )}
-                  >
-                    <div className="prose prose-invert prose-xl max-w-none">
-                      <ReactMarkdown>{msg.text}</ReactMarkdown>
-                    </div>
-                  </motion.div>
-                ))}
-                {isTyping && (
-                  <div className="bg-white/5 p-10 rounded-[3rem] rounded-tl-none w-28 flex justify-center border border-white/5">
-                    <Loader2 className="animate-spin text-blue-600" size={40} />
-                  </div>
-                )}
-                <div ref={chatEndRef} />
-              </div>
-
-              <div className="p-12 border-t border-white/5 bg-black/20">
-                <div className="flex gap-6">
-                  <input 
-                    type="text" 
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Pergunte sobre materiais, prazos ou ideias..."
-                    className="flex-1 bg-white/5 border border-white/10 rounded-3xl px-10 py-8 text-xl font-medium focus:outline-none focus:border-blue-600/50 transition-all"
-                  />
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSendMessage}
-                    disabled={isTyping || !chatInput.trim()}
-                    className="px-12 bg-blue-600 text-white rounded-3xl font-black text-xl flex items-center justify-center disabled:opacity-50 shadow-2xl shadow-blue-600/20"
-                  >
-                    <Send size={32} />
-                  </motion.button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Floating AI Trigger */}
-      <motion.button 
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setShowAIConsultant(true)}
-        className="fixed bottom-10 right-10 z-50 w-24 h-24 bg-blue-600 text-white rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-blue-600/40 hover:bg-blue-500 transition-all group"
-      >
-        <div className="absolute inset-0 bg-white/20 rounded-[2.5rem] animate-ping opacity-0 group-hover:opacity-100 transition-opacity" />
-        <MessageCircle size={40} />
-      </motion.button>
 
       {/* Gallery Modal */}
       <AnimatePresence>
